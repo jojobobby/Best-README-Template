@@ -19,6 +19,7 @@ import { applyLeverJob } from './platforms/lever';
 import { applyWorkdayJob } from './platforms/workday';
 import { applyGenericJob } from './platforms/generic';
 import { createWorkerLogger } from './logger';
+import { initWorkerSms, notifyApplySuccess, notifyApplyFailure, notifyApplySkipped } from './sms-notify';
 
 const logger = createWorkerLogger('worker');
 
@@ -45,6 +46,7 @@ async function getIdentity(env: WorkerEnv): Promise<Identity> {
 
 export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
   setPoolSize(env.BROWSER_POOL_SIZE);
+  initWorkerSms(env);
 
   const queue = createQueue(QUEUE_APPLY, env.REDIS_URL);
 
@@ -163,6 +165,9 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
           data: { status: 'APPLIED', appliedAt: new Date() },
         });
 
+        // Notify user of success via SMS
+        await notifyApplySuccess(dbJob.title, dbJob.company);
+
         logger.info('Application successful', {
           jobId,
           platform,
@@ -186,6 +191,7 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
           data: { status: 'SKIPPED', hasCaptcha: true, failureReason: errorMessage },
         });
         await logStep('FILL_FORM', 'SKIPPED', 'CAPTCHA detected');
+        await notifyApplySkipped(dbJob.title, dbJob.company, 'CAPTCHA detected, needs manual apply');
         return; // Don't retry
       }
 
@@ -195,6 +201,7 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
           data: { status: 'SKIPPED', requiresLogin: true, failureReason: errorMessage },
         });
         await logStep('LOGIN', 'SKIPPED', 'Login required');
+        await notifyApplySkipped(dbJob.title, dbJob.company, 'login required');
         return; // Don't retry
       }
 
@@ -213,6 +220,9 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
           data: { status: 'FAILED' },
         });
 
+        // Notify user of permanent failure
+        await notifyApplyFailure(dbJob.title, dbJob.company, errorMessage);
+
         logger.error('Apply permanently failed after max retries', {
           jobId,
           retryCount: updatedJob.retryCount,
@@ -229,9 +239,11 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
         throw err;
       }
     } finally {
+      // Clean up browser context and form cache for this job
       if (context) {
         await context.close().catch(() => {});
       }
+      clearFormCache();
     }
   });
 
