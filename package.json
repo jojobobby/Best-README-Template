@@ -1,0 +1,41 @@
+{
+  "name": "applybot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered job auto-apply system with SMS control via Twilio",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,yaml,yml,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,yaml,yml,md}\"",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @applybot/db generate",
+    "db:migrate": "pnpm --filter @applybot/db migrate:deploy",
+    "db:migrate:dev": "pnpm --filter @applybot/db migrate:dev",
+    "db:seed": "pnpm --filter @applybot/db seed",
+    "db:studio": "pnpm --filter @applybot/db studio",
+    "identity": "ts-node scripts/setup-identity.ts",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "eslint": "^8.57.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "ts-node": "^10.9.2",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.5"
+  },
+  "packageManager": "pnpm@9.4.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

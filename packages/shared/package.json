@@ -1,0 +1,22 @@
+{
+  "name": "@applybot/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared types, utilities, and interfaces for ApplyBot",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "bull": "^4.12.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {}
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@applybot/worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ApplyBot Playwright job apply agent with Claude AI form filling",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@applybot/db": "workspace:*",
+    "@applybot/shared": "workspace:*",
+    "@anthropic-ai/sdk": "^0.24.0",
+    "bull": "^4.12.0",
+    "playwright": "^1.44.0",
+    "uuid": "^10.0.0",
+    "winston": "^3.13.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "ts-node-dev": "^2.0.0"
+  }
+}

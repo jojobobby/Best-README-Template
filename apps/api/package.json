@@ -1,0 +1,40 @@
+{
+  "name": "@applybot/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ApplyBot Express API server with Twilio SMS webhooks",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "test": "jest --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@applybot/db": "workspace:*",
+    "@applybot/shared": "workspace:*",
+    "@bull-board/api": "^5.17.0",
+    "@bull-board/express": "^5.17.0",
+    "bull": "^4.12.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.0",
+    "express-rate-limit": "^7.3.0",
+    "helmet": "^7.1.0",
+    "prom-client": "^15.1.0",
+    "twilio": "^5.2.0",
+    "uuid": "^10.0.0",
+    "winston": "^3.13.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/uuid": "^10.0.0",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.2",
+    "ts-node-dev": "^2.0.0"
+  }
+}

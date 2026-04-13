@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: applybot-postgres
+    environment:
+      POSTGRES_DB: applybot
+      POSTGRES_USER: applybot
+      POSTGRES_PASSWORD: applybot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U applybot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: applybot-redis
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "applybot"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "applybot", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: applybot-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://applybot:applybot@postgres:5432/applybot?schema=public
+      REDIS_URL: redis://:applybot@redis:6379
+    volumes:
+      - identity-data:/identity:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: applybot-worker
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://applybot:applybot@postgres:5432/applybot?schema=public
+      REDIS_URL: redis://:applybot@redis:6379
+    volumes:
+      - identity-data:/identity
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scraper:
+    build:
+      context: .
+      dockerfile: apps/scraper/Dockerfile
+    container_name: applybot-scraper
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://applybot:applybot@postgres:5432/applybot?schema=public
+      REDIS_URL: redis://:applybot@redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: applybot-migrate
+    command: ["node", "-e", "const { execSync } = require('child_process'); execSync('npx prisma migrate deploy', { stdio: 'inherit' });"]
+    environment:
+      DATABASE_URL: postgresql://applybot:applybot@postgres:5432/applybot?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  postgres-data:
+  redis-data:
+  identity-data:

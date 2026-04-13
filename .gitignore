@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
+
+# Prisma
+packages/db/prisma/migrations/**/migration_lock.toml
+
+# Turbo
+.turbo/
+
+# Docker
+*.log
+
+# Identity (NEVER commit these)
+identity-setup/
+*.enc
+identity.json
+identity.json.decrypted
+
+# Screenshots from apply agent
+screenshots/
+
+# Secrets
+*.pem
+*.key
+credentials.json

@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum JobSource {
+  ADZUNA
+  GREENHOUSE
+  LEVER
+  WORKDAY
+  INDEED
+  MANUAL
+}
+
+enum JobStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  APPLYING
+  APPLIED
+  FAILED
+  SKIPPED
+}
+
+enum ApplicationStep {
+  NAVIGATE
+  LOGIN
+  FILL_FORM
+  UPLOAD_RESUME
+  GENERATE_COVER_LETTER
+  SUBMIT
+  CONFIRM
+  SCREENSHOT
+}
+
+enum StepStatus {
+  SUCCESS
+  FAILURE
+  SKIPPED
+}
+
+enum SmsDirection {
+  OUTBOUND
+  INBOUND
+}
+
+model Job {
+  id                 String   @id @default(uuid())
+  sourceId           String
+  source             JobSource
+  title              String
+  company            String
+  location           String?
+  salaryMin          Int?     @map("salary_min")
+  salaryMax          Int?     @map("salary_max")
+  salaryCurrency     String   @default("USD") @map("salary_currency")
+  description        String   @db.Text
+  applyUrl           String   @map("apply_url")
+  requiresLogin      Boolean  @default(false) @map("requires_login")
+  hasCaptcha         Boolean  @default(false) @map("has_captcha")
+  status             JobStatus @default(PENDING_REVIEW)
+  smsMessageSid      String?  @map("sms_message_sid")
+  smsReplyReceived   Boolean  @default(false) @map("sms_reply_received")
+  notifiedAt         DateTime? @map("notified_at")
+  repliedAt          DateTime? @map("replied_at")
+  appliedAt          DateTime? @map("applied_at")
+  failureReason      String?  @db.Text @map("failure_reason")
+  screenshotPath     String?  @map("screenshot_path")
+  coverLetterGenerated String? @db.Text @map("cover_letter_generated")
+  retryCount         Int      @default(0) @map("retry_count")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  applicationLogs    ApplicationLog[]
+  smsMessages        SmsMessage[]
+
+  @@unique([sourceId, source])
+  @@index([status])
+  @@index([source])
+  @@index([createdAt])
+  @@index([smsReplyReceived])
+  @@map("jobs")
+}
+
+model ApplicationLog {
+  id         String          @id @default(uuid())
+  jobId      String          @map("job_id")
+  step       ApplicationStep
+  status     StepStatus
+  details    String?         @db.Text
+  durationMs Int?            @map("duration_ms")
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  job        Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@map("application_logs")
+}
+
+model SmsMessage {
+  id        String       @id @default(uuid())
+  direction SmsDirection
+  twilioSid String       @unique @map("twilio_sid")
+  from      String
+  to        String
+  body      String       @db.Text
+  jobId     String?      @map("job_id")
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  job       Job?         @relation(fields: [jobId], references: [id], onDelete: SetNull)
+
+  @@index([jobId])
+  @@map("sms_messages")
+}
+
+model ScraperRun {
+  id            String    @id @default(uuid())
+  source        JobSource
+  jobsFound     Int       @map("jobs_found")
+  jobsNew       Int       @map("jobs_new")
+  jobsDuplicate Int       @map("jobs_duplicate")
+  errors        String?   @db.Text
+  durationMs    Int       @map("duration_ms")
+  ranAt         DateTime  @map("ran_at")
+
+  @@map("scraper_runs")
+}
