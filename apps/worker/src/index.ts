@@ -1,7 +1,8 @@
-import { validateEnv, workerEnvSchema } from '@applybot/shared';
+import { validateEnv, workerEnvSchema, closeAllQueues } from '@applybot/shared';
 import { prisma } from '@applybot/db';
 import { createWorkerLogger } from './logger';
 import { startWorker } from './worker';
+import { closeAllBrowsers } from './agent/browser';
 
 const logger = createWorkerLogger('main');
 
@@ -30,6 +31,8 @@ async function main() {
   const shutdown = async (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
     await worker.close();
+    await closeAllBrowsers();
+    await closeAllQueues();
     await prisma.$disconnect();
     logger.info('Shutdown complete');
     process.exit(0);

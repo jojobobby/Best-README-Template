@@ -1,4 +1,4 @@
-import { validateEnv, scraperEnvSchema } from '@applybot/shared';
+import { validateEnv, scraperEnvSchema, closeAllQueues } from '@applybot/shared';
 import { prisma } from '@applybot/db';
 import { createScraperLogger } from './logger';
 import { startScheduler } from './scheduler';
@@ -35,6 +35,7 @@ async function main() {
   const shutdown = async (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
     scheduler.stop();
+    await closeAllQueues();
     await prisma.$disconnect();
     logger.info('Shutdown complete');
     process.exit(0);

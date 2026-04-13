@@ -1,4 +1,4 @@
-import { parseSmsReply } from '@applybot/shared';
+import { parseSmsReply, validateStatusTransition, JobStatusError } from '@applybot/shared';
 
 describe('SMS reply parsing', () => {
   test('Y is parsed as APPROVE', () => {
@@ -51,7 +51,6 @@ describe('SMS reply parsing', () => {
 });
 
 describe('Status transitions', () => {
-  const { validateStatusTransition, JobStatusError } = require('@applybot/shared');
 
   test('PENDING_REVIEW can transition to APPROVED', () => {
     expect(() => validateStatusTransition('PENDING_REVIEW', 'APPROVED', 'test')).not.toThrow();

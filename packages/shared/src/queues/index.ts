@@ -12,9 +12,13 @@ export function createQueue(name: string, redisUrl?: string): Bull.Queue {
 
   const url = redisUrl || process.env.REDIS_URL || 'redis://localhost:6379';
 
+  // Apply queue uses manual retry logic in the worker, so set attempts=1
+  // Notify and scrape queues use Bull's built-in retry with exponential backoff
+  const isApplyQueue = name === QUEUE_APPLY;
+
   const queue = new Bull(name, url, {
     defaultJobOptions: {
-      attempts: 3,
+      attempts: isApplyQueue ? 1 : 3,
       backoff: {
         type: 'exponential',
         delay: 5000,

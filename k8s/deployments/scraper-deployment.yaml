@@ -31,6 +31,9 @@ spec:
                 name: applybot-secrets
             - configMapRef:
                 name: applybot-config
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 100m

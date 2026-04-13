@@ -15,8 +15,8 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "bull": "^4.12.0",
-    "zod": "^3.23.0"
+    "bull": "^4.16.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {}
 }

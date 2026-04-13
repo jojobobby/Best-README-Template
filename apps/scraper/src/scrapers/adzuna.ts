@@ -40,7 +40,6 @@ export async function scrapeAdzuna(
         what: query,
         where: location,
         sort_by: 'date',
-        page: String(page),
       });
 
       const url = `https://api.adzuna.com/v1/api/jobs/us/search/${page}?${params.toString()}`;

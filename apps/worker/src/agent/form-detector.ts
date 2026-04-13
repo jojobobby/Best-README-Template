@@ -24,8 +24,20 @@ export async function detectFormFields(
 ): Promise<FormField[]> {
   const url = page.url();
 
+  // Generate cache key using URL + visible form content hash to avoid stale results on multi-step forms
+  const contentHash = await page.evaluate(() => {
+    const form = document.querySelector('form, [role="form"], .application-form, #application');
+    const text = form ? form.textContent?.slice(0, 500) : document.body.textContent?.slice(0, 500);
+    let hash = 0;
+    for (let i = 0; i < (text?.length || 0); i++) {
+      hash = ((hash << 5) - hash + (text?.charCodeAt(i) || 0)) | 0;
+    }
+    return hash.toString(36);
+  });
+  const cacheKey = `${url}#${contentHash}`;
+
   // Check cache
-  const cached = formFieldCache.get(url);
+  const cached = formFieldCache.get(cacheKey);
   if (cached) {
     logger.info('Using cached form detection', { url, fieldCount: cached.length });
     return cached;
@@ -60,7 +72,7 @@ export async function detectFormFields(
     const client = new Anthropic({ apiKey: anthropicApiKey });
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-6-20250514',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [
@@ -86,8 +98,12 @@ export async function detectFormFields(
       throw new FormDetectionError(url, 'Claude returned non-array response');
     }
 
-    // Cache result
-    formFieldCache.set(url, fields);
+    // Cache result (limit cache size to prevent memory leaks)
+    if (formFieldCache.size > 50) {
+      const firstKey = formFieldCache.keys().next().value;
+      if (firstKey) formFieldCache.delete(firstKey);
+    }
+    formFieldCache.set(cacheKey, fields);
 
     logger.info('Form fields detected', { url, fieldCount: fields.length });
     return fields;

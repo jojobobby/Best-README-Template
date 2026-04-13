@@ -16,12 +16,12 @@
   "dependencies": {
     "@applybot/db": "workspace:*",
     "@applybot/shared": "workspace:*",
-    "@anthropic-ai/sdk": "^0.24.0",
-    "bull": "^4.12.0",
-    "playwright": "^1.44.0",
-    "uuid": "^10.0.0",
-    "winston": "^3.13.0",
-    "zod": "^3.23.0"
+    "@anthropic-ai/sdk": "^0.88.0",
+    "bull": "^4.16.0",
+    "playwright": "^1.52.0",
+    "uuid": "^11.1.0",
+    "winston": "^3.19.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/uuid": "^10.0.0",

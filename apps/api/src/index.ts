@@ -1,7 +1,12 @@
 import { createServer } from './server';
-import { validateEnv, apiEnvSchema } from '@applybot/shared';
+import { validateEnv, apiEnvSchema, closeAllQueues } from '@applybot/shared';
 import { prisma } from '@applybot/db';
 import { createLogger } from './middleware/logger';
+import { initQueues } from './services/queue';
+import { initTwilio } from './services/twilio';
+import { startNotifierWorker } from './jobs/notifier';
+import { startQueueDepthCollector } from './services/metrics';
+import { getIdentity } from './services/identity';
 
 const logger = createLogger('api');
 
@@ -24,6 +29,31 @@ async function main() {
   await prisma.$connect();
   logger.info('Database connected');
 
+  // Initialize queues and register error handlers
+  initQueues(env.REDIS_URL);
+  logger.info('Queues initialized');
+
+  // Initialize Twilio SMS client
+  initTwilio(env);
+  logger.info('Twilio client initialized');
+
+  // Start the notifier worker (processes SMS notification queue)
+  startNotifierWorker(env.REDIS_URL);
+  logger.info('Notifier worker started');
+
+  // Start Prometheus queue depth collector
+  startQueueDepthCollector(env.REDIS_URL);
+
+  // Pre-load identity to verify decryption works
+  try {
+    const identity = await getIdentity(env.IDENTITY_PATH, env.IDENTITY_KEY);
+    logger.info(`Identity loaded: ${identity.firstName} ${identity.lastName}`);
+  } catch (err) {
+    logger.warn('Identity not available at startup (will retry on demand)', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
   const app = createServer(env);
 
   const server = app.listen(env.PORT, () => {
@@ -33,6 +63,7 @@ async function main() {
   const shutdown = async (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
     server.close(async () => {
+      await closeAllQueues();
       await prisma.$disconnect();
       logger.info('Shutdown complete');
       process.exit(0);

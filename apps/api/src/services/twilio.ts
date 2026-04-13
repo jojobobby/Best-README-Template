@@ -1,4 +1,5 @@
 import Twilio from 'twilio';
+import { validateRequest } from 'twilio';
 import { Request } from 'express';
 import { prisma } from '@applybot/db';
 import { ApiEnv, TwilioError } from '@applybot/shared';
@@ -127,5 +128,5 @@ export function validateTwilioSignature(req: Request): boolean {
   const host = req.headers['host'] || '';
   const url = `${protocol}://${host}${req.originalUrl}`;
 
-  return Twilio.validateRequest(env.TWILIO_AUTH_TOKEN, signature, url, req.body);
+  return validateRequest(env.TWILIO_AUTH_TOKEN, signature, url, req.body);
 }

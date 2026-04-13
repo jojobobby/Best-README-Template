@@ -54,7 +54,7 @@ export async function findSubmitButton(page: Page): Promise<ElementHandle | null
 
 export interface SubmitResult {
   success: boolean;
-  confirmationText: string | null;
+  confirmationText?: string;
 }
 
 export async function submitApplication(

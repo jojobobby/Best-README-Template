@@ -132,7 +132,8 @@ export async function executeFillInstructions(
           break;
         }
         case 'radio': {
-          const radios = await page.$$(`input[name="${element.evaluate((el) => (el as HTMLInputElement).name)}"]`);
+          const elName = await element.evaluate((el) => (el as HTMLInputElement).name);
+          const radios = await page.$$(`input[name="${elName}"]`);
           for (const radio of radios) {
             const value = await radio.getAttribute('value');
             if (value && value.toLowerCase().includes(instr.value.toLowerCase())) {
@@ -179,7 +180,7 @@ export async function answerCustomQuestions(
   for (const field of customFields) {
     try {
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-6-20250514',
         max_tokens: 500,
         system:
           'You are filling out a job application. Answer the question concisely, professionally, and truthfully based on the applicant profile provided. Keep answers under 200 words. Do not use generic filler.',

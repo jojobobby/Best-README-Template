@@ -7,13 +7,13 @@ import {
   ApplyJobPayload,
   loadIdentity,
   Identity,
-  AppError,
   CaptchaDetectedError,
   LoginRequiredError,
+  closeAllQueues,
 } from '@applybot/shared';
-import { acquireBrowser, createContext, setPoolSize } from './agent/browser';
-import { navigateToUrl, detectPageType } from './agent/navigator';
+import { acquireBrowser, createContext, setPoolSize, closeAllBrowsers } from './agent/browser';
 import { captureScreenshot } from './agent/screenshot';
+import { clearFormCache } from './agent/form-detector';
 import { applyGreenhouseJob } from './platforms/greenhouse';
 import { applyLeverJob } from './platforms/lever';
 import { applyWorkdayJob } from './platforms/workday';

@@ -1,6 +1,6 @@
 # Stage 1: Base
-FROM node:20-alpine AS base
-RUN corepack enable && corepack prepare pnpm@9.4.0 --activate
+FROM node:22-alpine AS base
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 # Stage 2: Dependencies
@@ -24,7 +24,7 @@ RUN pnpm --filter @applybot/shared build
 RUN pnpm --filter @applybot/api build
 
 # Stage 4: Runner (production)
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 RUN apk add --no-cache dumb-init wget
 RUN addgroup -g 1001 nodejs && adduser -S -u 1000 applybot -G nodejs
 

@@ -1,14 +1,18 @@
 import { Router } from 'express';
 import { prisma } from '@applybot/db';
 import { ApiEnv, parseSmsReply, enqueueApply } from '@applybot/shared';
-import { validateTwilioSignature, initTwilio } from '../services/twilio';
+import { validateTwilioSignature } from '../services/twilio';
 import { jobsApprovedTotal, jobsRejectedTotal } from '../services/metrics';
 import { createLogger } from '../middleware/logger';
 
 const logger = createLogger('sms-webhook');
 
+function escapeXml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function twiml(message: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${message}</Message></Response>`;
+  return `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapeXml(message)}</Message></Response>`;
 }
 
 export function smsRouter(env: ApiEnv): Router {

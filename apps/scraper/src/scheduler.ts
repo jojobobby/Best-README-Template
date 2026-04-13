@@ -27,35 +27,38 @@ export function startScheduler(env: ScraperEnv): Scheduler {
     running = true;
     logger.info('Starting scraper run');
 
-    // Adzuna
-    await runScraper('ADZUNA', async () => {
-      const raw = await scrapeAdzuna(
-        env.ADZUNA_APP_ID,
-        env.ADZUNA_APP_KEY,
-        env.SEARCH_KEYWORDS,
-        env.SEARCH_LOCATION,
-      );
-      return filterRelevant(raw, env.SEARCH_KEYWORDS, env.EXCLUDE_KEYWORDS);
-    });
-
-    // Greenhouse
-    if (env.GREENHOUSE_COMPANY_SLUGS.length > 0) {
-      await runScraper('GREENHOUSE', async () => {
-        const raw = await scrapeGreenhouse(env.GREENHOUSE_COMPANY_SLUGS);
+    try {
+      // Adzuna
+      await runScraper('ADZUNA', async () => {
+        const raw = await scrapeAdzuna(
+          env.ADZUNA_APP_ID,
+          env.ADZUNA_APP_KEY,
+          env.SEARCH_KEYWORDS,
+          env.SEARCH_LOCATION,
+        );
         return filterRelevant(raw, env.SEARCH_KEYWORDS, env.EXCLUDE_KEYWORDS);
       });
-    }
 
-    // Lever
-    if (env.LEVER_COMPANY_SLUGS.length > 0) {
-      await runScraper('LEVER', async () => {
-        const raw = await scrapeLever(env.LEVER_COMPANY_SLUGS);
-        return filterRelevant(raw, env.SEARCH_KEYWORDS, env.EXCLUDE_KEYWORDS);
-      });
-    }
+      // Greenhouse
+      if (env.GREENHOUSE_COMPANY_SLUGS.length > 0) {
+        await runScraper('GREENHOUSE', async () => {
+          const raw = await scrapeGreenhouse(env.GREENHOUSE_COMPANY_SLUGS);
+          return filterRelevant(raw, env.SEARCH_KEYWORDS, env.EXCLUDE_KEYWORDS);
+        });
+      }
 
-    running = false;
-    logger.info('Scraper run complete');
+      // Lever
+      if (env.LEVER_COMPANY_SLUGS.length > 0) {
+        await runScraper('LEVER', async () => {
+          const raw = await scrapeLever(env.LEVER_COMPANY_SLUGS);
+          return filterRelevant(raw, env.SEARCH_KEYWORDS, env.EXCLUDE_KEYWORDS);
+        });
+      }
+
+      logger.info('Scraper run complete');
+    } finally {
+      running = false;
+    }
   }
 
   async function runScraper(
