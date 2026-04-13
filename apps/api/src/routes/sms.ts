@@ -17,7 +17,6 @@ function twiml(message: string): string {
 
 export function smsRouter(env: ApiEnv): Router {
   const router = Router();
-  initTwilio(env);
 
   router.post('/', async (req, res) => {
     try {

@@ -4,7 +4,7 @@ import { prisma } from '@applybot/db';
 import { createLogger } from './middleware/logger';
 import { initQueues } from './services/queue';
 import { initTwilio } from './services/twilio';
-import { startNotifierWorker } from './jobs/notifier';
+import { startNotifierWorker, runDailySummary } from './jobs/notifier';
 import { startQueueDepthCollector } from './services/metrics';
 import { getIdentity } from './services/identity';
 
@@ -43,6 +43,15 @@ async function main() {
 
   // Start Prometheus queue depth collector
   startQueueDepthCollector(env.REDIS_URL);
+
+  // Schedule daily summary SMS
+  const cron = await import('node-cron');
+  cron.schedule(env.DAILY_SUMMARY_CRON, () => {
+    runDailySummary().catch((err) => {
+      logger.error('Daily summary failed', { error: err instanceof Error ? err.message : String(err) });
+    });
+  });
+  logger.info(`Daily summary scheduled: ${env.DAILY_SUMMARY_CRON}`);
 
   // Pre-load identity to verify decryption works
   try {

@@ -1,0 +1,28 @@
+{
+  "jobs": [
+    {
+      "id": 100001,
+      "title": "Software Engineer",
+      "location": { "name": "San Francisco, CA" },
+      "absolute_url": "https://boards.greenhouse.io/testcompany/jobs/100001",
+      "content": "<p>We are looking for a <strong>Software Engineer</strong> to join our platform team. You will build scalable APIs and contribute to our core infrastructure.</p><h3>Requirements</h3><ul><li>3+ years of experience</li><li>TypeScript proficiency</li><li>Experience with distributed systems</li></ul>",
+      "updated_at": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": 100002,
+      "title": "Frontend Developer",
+      "location": { "name": "Remote" },
+      "absolute_url": "https://boards.greenhouse.io/testcompany/jobs/100002",
+      "content": "<p>Join our frontend team to build beautiful user interfaces with React and TypeScript.</p>",
+      "updated_at": "2024-01-14T10:00:00Z"
+    },
+    {
+      "id": 100003,
+      "title": "Backend Engineer",
+      "location": { "name": "New York, NY" },
+      "absolute_url": "https://boards.greenhouse.io/testcompany/jobs/100003",
+      "content": "<p>Design and build high-throughput data processing pipelines using Go and PostgreSQL.</p>",
+      "updated_at": "2024-01-13T10:00:00Z"
+    }
+  ]
+}

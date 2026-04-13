@@ -111,14 +111,14 @@ function hasFailureText(text: string): boolean {
   return FAILURE_INDICATORS.some((indicator) => text.includes(indicator));
 }
 
-function extractConfirmation(text: string): string | null {
+function extractConfirmation(text: string): string | undefined {
   for (const indicator of SUCCESS_INDICATORS) {
     const idx = text.indexOf(indicator);
     if (idx !== -1) {
-      return text.slice(idx, idx + 200).split('\n')[0] || null;
+      return text.slice(idx, idx + 200).split('\n')[0] || undefined;
     }
   }
-  return null;
+  return undefined;
 }
 
 function extractErrors(text: string): string {

@@ -1,19 +1,18 @@
 import Bull from 'bull';
 import { prisma } from '@applybot/db';
 import { createQueue, QUEUE_NOTIFY, NotifyJobPayload } from '@applybot/shared';
-import { sendJobNotification } from '../services/twilio';
+import { sendJobNotification, sendDailySummary } from '../services/twilio';
 import { jobsNotifiedTotal } from '../services/metrics';
 import { createLogger } from '../middleware/logger';
 
 const logger = createLogger('notifier');
 
-const NOTIFICATION_DELAY_MS = 3 * 60 * 1000; // 3 minutes between notifications
-const MAX_BATCH_SIZE = 3;
+const CONCURRENCY = 3;
 
 export function startNotifierWorker(redisUrl: string): Bull.Queue {
   const queue = createQueue(QUEUE_NOTIFY, redisUrl);
 
-  queue.process(MAX_BATCH_SIZE, async (job: Bull.Job<NotifyJobPayload>) => {
+  queue.process(CONCURRENCY, async (job: Bull.Job<NotifyJobPayload>) => {
     const { jobId } = job.data;
 
     logger.info('Processing notification', { jobId });
@@ -56,24 +55,16 @@ export function startNotifierWorker(redisUrl: string): Bull.Queue {
   return queue;
 }
 
-export async function enqueueNotificationsWithDelay(jobIds: string[], redisUrl: string) {
-  const queue = createQueue(QUEUE_NOTIFY, redisUrl);
+export async function runDailySummary(): Promise<void> {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  for (let i = 0; i < jobIds.length; i++) {
-    const delay = i * NOTIFICATION_DELAY_MS;
-    await queue.add(
-      { jobId: jobIds[i] } as NotifyJobPayload,
-      {
-        jobId: `notify-${jobIds[i]}`,
-        delay,
-      },
-    );
+  const [applied, failed, pending] = await Promise.all([
+    prisma.job.count({ where: { status: 'APPLIED', appliedAt: { gte: today } } }),
+    prisma.job.count({ where: { status: 'FAILED', updatedAt: { gte: today } } }),
+    prisma.job.count({ where: { status: 'PENDING_REVIEW' } }),
+  ]);
 
-    logger.info('Notification enqueued', {
-      jobId: jobIds[i],
-      delayMs: delay,
-      position: i + 1,
-      total: jobIds.length,
-    });
-  }
+  await sendDailySummary({ applied, failed, pending });
+  logger.info('Daily summary sent', { applied, failed, pending });
 }

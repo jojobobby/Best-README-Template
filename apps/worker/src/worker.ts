@@ -77,17 +77,12 @@ export async function startWorker(env: WorkerEnv): Promise<Bull.Queue> {
     // Load identity
     const identity = await getIdentity(env);
 
-    // Log step helper
-    const logStep = async (
-      step: string,
-      status: 'SUCCESS' | 'FAILURE' | 'SKIPPED',
-      details?: string,
-      durationMs?: number,
-    ) => {
+    // Log step helper — type-safe with ApplicationStepType
+    const logStep: import('@applybot/shared').LogStepFn = async (step, status, details, durationMs) => {
       await prisma.applicationLog.create({
         data: {
           jobId,
-          step: step as 'NAVIGATE' | 'LOGIN' | 'FILL_FORM' | 'UPLOAD_RESUME' | 'GENERATE_COVER_LETTER' | 'SUBMIT' | 'CONFIRM' | 'SCREENSHOT',
+          step,
           status,
           details,
           durationMs,

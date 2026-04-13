@@ -20,6 +20,7 @@ export const apiEnvSchema = baseEnvSchema.extend({
   BULL_BOARD_USER: z.string().optional(),
   BULL_BOARD_PASS: z.string().optional(),
   METRICS_TOKEN: z.string().optional(),
+  DAILY_SUMMARY_CRON: z.string().default('0 18 * * *'),
   LOG_TO_FILE: z
     .string()
     .transform((v) => v === 'true')

@@ -61,8 +61,18 @@ export interface ApplyResult {
   error?: string;
 }
 
+export type ApplicationStepType =
+  | 'NAVIGATE'
+  | 'LOGIN'
+  | 'FILL_FORM'
+  | 'UPLOAD_RESUME'
+  | 'GENERATE_COVER_LETTER'
+  | 'SUBMIT'
+  | 'CONFIRM'
+  | 'SCREENSHOT';
+
 export type LogStepFn = (
-  step: string,
+  step: ApplicationStepType,
   status: 'SUCCESS' | 'FAILURE' | 'SKIPPED',
   details?: string,
   durationMs?: number,
