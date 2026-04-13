@@ -1,0 +1,35 @@
+{
+  "valid_yes": {
+    "MessageSid": "SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "AccountSid": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "From": "+15559876543",
+    "To": "+15551234567",
+    "Body": "Y",
+    "NumMedia": "0",
+    "NumSegments": "1",
+    "SmsStatus": "received",
+    "ApiVersion": "2010-04-01"
+  },
+  "valid_no": {
+    "MessageSid": "SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxy",
+    "AccountSid": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "From": "+15559876543",
+    "To": "+15551234567",
+    "Body": "N",
+    "NumMedia": "0",
+    "NumSegments": "1",
+    "SmsStatus": "received",
+    "ApiVersion": "2010-04-01"
+  },
+  "ambiguous": {
+    "MessageSid": "SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxz",
+    "AccountSid": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "From": "+15559876543",
+    "To": "+15551234567",
+    "Body": "Maybe later",
+    "NumMedia": "0",
+    "NumSegments": "1",
+    "SmsStatus": "received",
+    "ApiVersion": "2010-04-01"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "results": [
+    {
+      "id": "4001234567",
+      "title": "Software Engineer",
+      "company": { "display_name": "TechCorp" },
+      "location": { "display_name": "San Francisco, CA" },
+      "salary_min": 120000,
+      "salary_max": 180000,
+      "description": "We are looking for a skilled Software Engineer to join our growing team.",
+      "redirect_url": "https://www.adzuna.com/details/4001234567",
+      "created": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "4001234568",
+      "title": "Full Stack Developer",
+      "company": { "display_name": "WebStartup Inc" },
+      "location": { "display_name": "Remote" },
+      "salary_min": 100000,
+      "salary_max": 150000,
+      "description": "Join our fast-paced team building the next generation web platform.",
+      "redirect_url": "https://www.adzuna.com/details/4001234568",
+      "created": "2024-01-14T10:00:00Z"
+    },
+    {
+      "id": "4001234569",
+      "title": "Backend Engineer",
+      "company": { "display_name": "DataSystems Co" },
+      "location": { "display_name": "New York, NY" },
+      "salary_min": 130000,
+      "salary_max": 170000,
+      "description": "Build high-performance data processing pipelines.",
+      "redirect_url": "https://www.adzuna.com/details/4001234569",
+      "created": "2024-01-13T10:00:00Z"
+    },
+    {
+      "id": "4001234570",
+      "title": "Senior Principal Staff Architect",
+      "company": { "display_name": "BigCorp" },
+      "location": { "display_name": "Seattle, WA" },
+      "description": "Lead architecture decisions across the organization.",
+      "redirect_url": "https://www.adzuna.com/details/4001234570",
+      "created": "2024-01-12T10:00:00Z"
+    },
+    {
+      "id": "4001234571",
+      "title": "Frontend Developer",
+      "company": { "display_name": "DesignLab" },
+      "location": { "display_name": "Austin, TX" },
+      "salary_min": 90000,
+      "salary_max": 130000,
+      "description": "Create beautiful, responsive user interfaces with React.",
+      "redirect_url": "https://www.adzuna.com/details/4001234571",
+      "created": "2024-01-11T10:00:00Z"
+    }
+  ],
+  "count": 5
+}
