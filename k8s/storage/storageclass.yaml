@@ -1,0 +1,9 @@
+# Local storage class for PVs on dedicated server
+# Uses WaitForFirstConsumer to ensure pods and volumes co-locate
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+reclaimPolicy: Retain

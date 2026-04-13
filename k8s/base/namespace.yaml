@@ -1,0 +1,8 @@
+# Namespace for all ApplyBot resources
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/part-of: applybot

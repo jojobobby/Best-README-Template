@@ -1,0 +1,41 @@
+# CronJob to run scraper on schedule (backup to in-process cron)
+# This ensures scraping continues even if the scraper pod restarts
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: applybot-scraper-cron
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: scraper
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: applybot-sa
+          restartPolicy: OnFailure
+          containers:
+            - name: scraper
+              image: ghcr.io/jojobobby/applybot-scraper:latest
+              command: ["node", "dist/index.js"]
+              env:
+                - name: SCRAPE_ON_START
+                  value: "true"
+              envFrom:
+                - secretRef:
+                    name: applybot-secrets
+                - configMapRef:
+                    name: applybot-config
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 512Mi

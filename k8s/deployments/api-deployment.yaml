@@ -1,0 +1,89 @@
+# API server deployment — Express.js with Twilio webhooks
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: applybot-api
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: api
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: applybot-api
+  template:
+    metadata:
+      labels:
+        app: applybot-api
+        app.kubernetes.io/name: applybot
+        app.kubernetes.io/component: api
+    spec:
+      serviceAccountName: applybot-sa
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always
+      containers:
+        - name: api
+          image: ghcr.io/jojobobby/applybot-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+              protocol: TCP
+          # Load all secrets and config
+          envFrom:
+            - secretRef:
+                name: applybot-secrets
+            - configMapRef:
+                name: applybot-config
+          # Identity key from dedicated secret
+          env:
+            - name: IDENTITY_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: identitykey
+                  key: IDENTITY_KEY
+          # Mount identity PVC (read-only for API)
+          volumeMounts:
+            - name: identity
+              mountPath: /identity
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: identity
+          persistentVolumeClaim:
+            claimName: identity
+        - name: tmp
+          emptyDir:
+            medium: Memory

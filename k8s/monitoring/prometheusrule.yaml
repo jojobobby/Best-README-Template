@@ -1,0 +1,52 @@
+# Alerting rules for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: applybot-alerts
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    release: prometheus
+spec:
+  groups:
+    - name: applybot.rules
+      rules:
+        # Alert if apply failure rate exceeds 3 in 10 minutes
+        - alert: ApplybotApplyFailureRate
+          expr: increase(applybot_jobs_failed_total[10m]) > 3
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High apply failure rate"
+            description: "More than 3 apply failures in the last 10 minutes"
+
+        # Alert if apply queue backlog exceeds 10
+        - alert: ApplybotQueueBacklog
+          expr: applybot_queue_depth{queue_name="apply"} > 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Apply queue backlog growing"
+            description: "Apply queue has more than 10 pending jobs for 5+ minutes"
+
+        # Alert if any pod is not ready for 5 minutes
+        - alert: ApplybotPodNotReady
+          expr: kube_pod_status_ready{namespace="applybot", condition="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "ApplyBot pod not ready"
+            description: "Pod {{ $labels.pod }} has been not ready for 5+ minutes"
+
+        # Alert if worker memory exceeds 2.5Gi (Playwright memory leak)
+        - alert: ApplybotHighMemory
+          expr: container_memory_usage_bytes{namespace="applybot", container="worker"} > 2.5e9
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Worker memory usage high"
+            description: "Worker container using more than 2.5Gi — possible Playwright memory leak"

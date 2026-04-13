@@ -1,0 +1,53 @@
+# Scraper deployment — job source aggregator
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: applybot-scraper
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: scraper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applybot-scraper
+  template:
+    metadata:
+      labels:
+        app: applybot-scraper
+        app.kubernetes.io/name: applybot
+        app.kubernetes.io/component: scraper
+    spec:
+      serviceAccountName: applybot-sa
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+      containers:
+        - name: scraper
+          image: ghcr.io/jojobobby/applybot-scraper:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: applybot-secrets
+            - configMapRef:
+                name: applybot-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command: ["node", "-e", "process.exit(0)"]
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory

@@ -1,0 +1,30 @@
+# Kubernetes Job to run Prisma database migrations
+# Run before deploying new app versions
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: applybot-migrate
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: migrate
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: applybot-sa
+      restartPolicy: OnFailure
+      containers:
+        - name: migrate
+          image: ghcr.io/jojobobby/applybot-api:latest
+          command: ["npx", "prisma", "migrate", "deploy"]
+          envFrom:
+            - secretRef:
+                name: applybot-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

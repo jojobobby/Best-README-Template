@@ -1,0 +1,46 @@
+# Traefik IngressRoute for k3s — routes external traffic to the API
+# k3s ships with Traefik, so we use IngressRoute instead of nginx Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: applybot-ingress
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: applybot-api
+          port: 80
+      # Uncomment to enable TLS with cert-manager:
+      # middlewares:
+      #   - name: redirect-https
+  # Uncomment for TLS:
+  # tls:
+  #   certResolver: letsencrypt
+---
+# Fallback: standard Kubernetes Ingress (works if you install nginx ingress controller)
+# Uncomment if not using Traefik:
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: applybot-ingress
+#   namespace: applybot
+#   annotations:
+#     kubernetes.io/ingress.class: nginx
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: applybot-api
+#                 port:
+#                   number: 80

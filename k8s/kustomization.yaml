@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: applybot
+
+commonLabels:
+  app.kubernetes.io/name: applybot
+  app.kubernetes.io/version: latest
+
+resources:
+  # 1. Namespace and storage class
+  - base/namespace.yaml
+  - storage/storageclass.yaml
+
+  # 2. RBAC
+  - base/rbac.yaml
+
+  # 3. Secrets and config
+  - base/secrets.yaml
+  - base/configmap.yaml
+
+  # 4. Persistent volumes and claims
+  - storage/identity-pv.yaml
+  - storage/identity-pvc.yaml
+  - storage/postgres-pv.yaml
+  - storage/redis-pv.yaml
+  - storage/redis-pvc.yaml
+
+  # 5. Infrastructure services
+  - deployments/postgres-deployment.yaml
+  - services/postgres-service.yaml
+  - deployments/redis-deployment.yaml
+  - services/redis-service.yaml
+
+  # 6. Application deployments
+  - deployments/api-deployment.yaml
+  - services/api-service.yaml
+  - deployments/worker-deployment.yaml
+  - deployments/scraper-deployment.yaml
+
+  # 7. Ingress
+  - ingress/ingress.yaml
+
+  # 8. Jobs and CronJobs
+  - jobs/migrate.yaml
+  - cronjobs/scraper-cron.yaml
+
+  # 9. Autoscaling
+  - hpa.yaml
+
+  # 10. Monitoring (requires Prometheus Operator)
+  # - monitoring/servicemonitor.yaml
+  # - monitoring/prometheusrule.yaml

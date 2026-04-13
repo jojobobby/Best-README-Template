@@ -1,0 +1,27 @@
+# PersistentVolume for the encrypted identity profile, resume, and screenshots
+# This is where profile.enc (decrypted using identitykey secret) and resume.pdf live
+# Screenshots from apply agent are also stored here at /identity/screenshots/
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: identity-pv
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: identity
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  # Host path on dedicated server — create with: mkdir -p /mnt/applybot-identity/screenshots
+  hostPath:
+    path: /mnt/applybot-identity
+    type: DirectoryOrCreate
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: Exists

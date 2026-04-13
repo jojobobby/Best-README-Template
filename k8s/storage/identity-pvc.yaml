@@ -1,0 +1,18 @@
+# PersistentVolumeClaim for the identity PVC — mounted by API and Worker pods
+# Contains: profile.enc (encrypted identity), resume.pdf, screenshots/
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: identity
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: identity
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: identity-pv

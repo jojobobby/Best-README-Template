@@ -1,0 +1,18 @@
+# ClusterIP service for Postgres
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+      name: postgres

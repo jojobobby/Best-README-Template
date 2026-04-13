@@ -1,0 +1,34 @@
+# Non-sensitive configuration values for all ApplyBot services
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: applybot-config
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+data:
+  # Runtime environment
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  LOG_TO_FILE: "false"
+
+  # Browser automation settings
+  HEADLESS: "true"
+  BROWSER_POOL_SIZE: "2"
+  PLAYWRIGHT_CHROMIUM_ARGS: "--no-sandbox --disable-setuid-sandbox"
+
+  # Application retry logic
+  MAX_RETRIES: "3"
+
+  # Scraper schedule
+  SCRAPE_INTERVAL_MINUTES: "30"
+  SCRAPE_ON_START: "true"
+  DAILY_SUMMARY_CRON: "0 18 * * *"
+
+  # File paths (inside the identity PVC)
+  SCREENSHOT_DIR: "/identity/screenshots"
+  RESUME_PATH: "/identity/resume.pdf"
+  IDENTITY_PATH: "/identity/profile.enc"
+
+  # API server port
+  PORT: "3000"

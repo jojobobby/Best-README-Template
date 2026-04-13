@@ -1,0 +1,21 @@
+# ServiceMonitor for Prometheus Operator — scrapes /metrics from the API
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: applybot-api-monitor
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: api
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      # Uncomment if using METRICS_TOKEN:
+      # bearerTokenSecret:
+      #   name: applybot-secrets
+      #   key: METRICS_TOKEN

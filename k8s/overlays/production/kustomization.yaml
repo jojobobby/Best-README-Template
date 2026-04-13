@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../
+
+# Override images with actual registry and tags
+images:
+  - name: ghcr.io/jojobobby/applybot-api
+    newTag: latest
+  - name: ghcr.io/jojobobby/applybot-worker
+    newTag: latest
+  - name: ghcr.io/jojobobby/applybot-scraper
+    newTag: latest
+
+# Production-specific patches
+patches:
+  # API: ensure 2 replicas in production
+  - target:
+      kind: Deployment
+      name: applybot-api
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 2
+
+  # Worker: 1 replica (Playwright is heavy)
+  - target:
+      kind: Deployment
+      name: applybot-worker
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 1

@@ -1,0 +1,35 @@
+# ServiceAccount for ApplyBot pods
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: applybot-sa
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+---
+# Role allowing read access to the identitykey secret
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: applybot-role
+  namespace: applybot
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["identitykey"]
+    verbs: ["get"]
+---
+# Bind the role to the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: applybot-rolebinding
+  namespace: applybot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: applybot-role
+subjects:
+  - kind: ServiceAccount
+    name: applybot-sa
+    namespace: applybot

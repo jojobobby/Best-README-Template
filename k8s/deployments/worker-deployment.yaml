@@ -1,0 +1,69 @@
+# Worker deployment — Playwright apply agent (only 1 replica, heavy on resources)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: applybot-worker
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: applybot-worker
+  template:
+    metadata:
+      labels:
+        app: applybot-worker
+        app.kubernetes.io/name: applybot
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: applybot-sa
+      terminationGracePeriodSeconds: 60
+      restartPolicy: Always
+      containers:
+        - name: worker
+          image: ghcr.io/jojobobby/applybot-worker:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: applybot-secrets
+            - configMapRef:
+                name: applybot-config
+          env:
+            - name: IDENTITY_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: identitykey
+                  key: IDENTITY_KEY
+          # Mount identity PVC (read-write for screenshots)
+          volumeMounts:
+            - name: identity
+              mountPath: /identity
+            - name: tmp
+              mountPath: /tmp
+          # Playwright + Chrome needs more resources
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 3Gi
+          # Worker doesn't serve HTTP — use exec probe
+          livenessProbe:
+            exec:
+              command: ["node", "-e", "process.exit(0)"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+      volumes:
+        - name: identity
+          persistentVolumeClaim:
+            claimName: identity
+        - name: tmp
+          emptyDir:
+            medium: Memory

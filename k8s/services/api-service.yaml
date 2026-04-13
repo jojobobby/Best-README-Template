@@ -1,0 +1,18 @@
+# ClusterIP service exposing the API server
+apiVersion: v1
+kind: Service
+metadata:
+  name: applybot-api
+  namespace: applybot
+  labels:
+    app.kubernetes.io/name: applybot
+    app.kubernetes.io/component: api
+spec:
+  type: ClusterIP
+  selector:
+    app: applybot-api
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
+      name: http
