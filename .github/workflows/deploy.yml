@@ -1,0 +1,129 @@
+name: Build, Test & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io/jojobobby
+
+jobs:
+  test:
+    name: Type Check & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter @applybot/db generate
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+        continue-on-error: true
+
+  build-push:
+    name: Build & Push Images
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha: ${{ steps.sha.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get SHA
+        id: sha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push API
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/applybot-api:${{ steps.sha.outputs.sha }}
+            ${{ env.REGISTRY }}/applybot-api:latest
+
+      - name: Build and push Worker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/worker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/applybot-worker:${{ steps.sha.outputs.sha }}
+            ${{ env.REGISTRY }}/applybot-worker:latest
+
+      - name: Build and push Scraper
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/scraper/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/applybot-scraper:${{ steps.sha.outputs.sha }}
+            ${{ env.REGISTRY }}/applybot-scraper:latest
+
+  deploy:
+    name: Deploy to Server
+    needs: build-push
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /opt/applybot
+            git pull origin main
+
+            # Update image tags
+            cd k8s/overlays/production
+            kustomize edit set image \
+              ghcr.io/jojobobby/applybot-api:${{ needs.build-push.outputs.sha }} \
+              ghcr.io/jojobobby/applybot-worker:${{ needs.build-push.outputs.sha }} \
+              ghcr.io/jojobobby/applybot-scraper:${{ needs.build-push.outputs.sha }}
+
+            # Apply
+            kubectl apply -k .
+
+            # Wait for rollout
+            kubectl rollout status deployment/applybot-api -n applybot --timeout=120s
+            kubectl rollout status deployment/applybot-worker -n applybot --timeout=120s
+            kubectl rollout status deployment/applybot-scraper -n applybot --timeout=120s
+
+            # Verify
+            kubectl get pods -n applybot

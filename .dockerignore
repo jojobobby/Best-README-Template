@@ -1,0 +1,15 @@
+node_modules
+.git
+dist
+*.log
+.env
+.env.*
+coverage
+playwright-report
+test-results
+.turbo
+*.tsbuildinfo
+identity-setup
+*.enc
+identity.json
+screenshots
