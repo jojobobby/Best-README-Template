@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { prisma, JobSource } from '@applybot/db';
-import { ScraperEnv, enqueueNotify } from '@applybot/shared';
+import { ScraperEnv, JobCreateInput, enqueueNotify } from '@applybot/shared';
 import { scrapeAdzuna } from './scrapers/adzuna';
 import { scrapeGreenhouse } from './scrapers/greenhouse';
 import { scrapeLever } from './scrapers/lever';
@@ -61,10 +61,7 @@ export function startScheduler(env: ScraperEnv): Scheduler {
     }
   }
 
-  async function runScraper(
-    source: string,
-    fetchFn: () => Promise<Array<{ sourceId: string; source: string; [key: string]: unknown }>>,
-  ) {
+  async function runScraper(source: string, fetchFn: () => Promise<JobCreateInput[]>) {
     const startTime = Date.now();
     let jobsFound = 0;
     let jobsNew = 0;
@@ -83,15 +80,16 @@ export function startScheduler(env: ScraperEnv): Scheduler {
           data: {
             sourceId: job.sourceId,
             source: job.source as JobSource,
-            title: job.title as string,
-            company: job.company as string,
-            location: (job.location as string) || null,
-            salaryMin: (job.salaryMin as number) || null,
-            salaryMax: (job.salaryMax as number) || null,
-            salaryCurrency: (job.salaryCurrency as string) || 'USD',
-            description: job.description as string,
-            applyUrl: job.applyUrl as string,
-            requiresLogin: (job.requiresLogin as boolean) || false,
+            title: job.title,
+            company: job.company,
+            location: job.location ?? null,
+            salaryMin: job.salaryMin ?? null,
+            salaryMax: job.salaryMax ?? null,
+            salaryCurrency: job.salaryCurrency ?? 'USD',
+            description: job.description,
+            applyUrl: job.applyUrl,
+            requiresLogin: job.requiresLogin ?? false,
+            hasCaptcha: job.hasCaptcha ?? false,
             status: 'PENDING_REVIEW',
           },
         });

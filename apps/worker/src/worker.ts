@@ -9,9 +9,8 @@ import {
   Identity,
   CaptchaDetectedError,
   LoginRequiredError,
-  closeAllQueues,
 } from '@applybot/shared';
-import { acquireBrowser, createContext, setPoolSize, closeAllBrowsers } from './agent/browser';
+import { acquireBrowser, createContext, setPoolSize } from './agent/browser';
 import { captureScreenshot } from './agent/screenshot';
 import { clearFormCache } from './agent/form-detector';
 import { applyGreenhouseJob } from './platforms/greenhouse';

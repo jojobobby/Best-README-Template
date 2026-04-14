@@ -141,7 +141,7 @@ async function attemptCaptchaSolve(page: Page, apiKey: string): Promise<boolean>
             textarea.style.display = 'block';
           }
           // Trigger callback if exists
-          const callback = (window as Record<string, unknown>).__recaptchaCallback;
+          const callback = (window as unknown as Record<string, unknown>).__recaptchaCallback;
           if (typeof callback === 'function') {
             (callback as (token: string) => void)(token);
           }

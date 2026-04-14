@@ -40,7 +40,7 @@ export function jobsRouter(env: ApiEnv): Router {
   // GET /jobs — paginated job list
   router.get('/', validate(listQuerySchema, 'query'), async (req, res, next) => {
     try {
-      const { status, source, page, limit } = req.query as z.infer<typeof listQuerySchema>;
+      const { status, source, page, limit } = req.query as unknown as z.infer<typeof listQuerySchema>;
 
       const where: Record<string, unknown> = {};
       if (status) where.status = status;
@@ -80,15 +80,16 @@ export function jobsRouter(env: ApiEnv): Router {
   // GET /jobs/:id — job detail
   router.get('/:id', async (req, res, next) => {
     try {
+      const id = req.params.id as string;
       const job = await prisma.job.findUnique({
-        where: { id: req.params.id },
+        where: { id },
         include: {
           applicationLogs: { orderBy: { createdAt: 'asc' } },
         },
       });
 
       if (!job) {
-        throw new JobNotFoundError(req.params.id!);
+        throw new JobNotFoundError(id);
       }
 
       res.json(job);
@@ -100,9 +101,10 @@ export function jobsRouter(env: ApiEnv): Router {
   // PATCH /jobs/:id/status — manual status override
   router.patch('/:id/status', validate(updateStatusSchema), async (req, res, next) => {
     try {
-      const job = await prisma.job.findUnique({ where: { id: req.params.id } });
+      const id = req.params.id as string;
+      const job = await prisma.job.findUnique({ where: { id } });
       if (!job) {
-        throw new JobNotFoundError(req.params.id!);
+        throw new JobNotFoundError(id);
       }
 
       const { status } = req.body as z.infer<typeof updateStatusSchema>;

@@ -56,7 +56,7 @@ export function requestLogger() {
     const requestId = uuid();
     const start = Date.now();
 
-    (req as Record<string, unknown>).requestId = requestId;
+    (req as unknown as Record<string, unknown>).requestId = requestId;
     res.setHeader('X-Request-Id', requestId);
 
     res.on('finish', () => {

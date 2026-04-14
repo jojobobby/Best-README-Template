@@ -1,20 +1,20 @@
-import { prisma } from '@applybot/db';
+import { prisma, JobSource } from '@applybot/db';
 import { createScraperLogger } from '../logger';
 
 const logger = createScraperLogger('dedup');
 
 export async function checkDuplicate(sourceId: string, source: string): Promise<boolean> {
   const existing = await prisma.job.findFirst({
-    where: { sourceId, source: source as 'ADZUNA' | 'GREENHOUSE' | 'LEVER' | 'WORKDAY' | 'INDEED' | 'MANUAL' },
+    where: { sourceId, source: source as JobSource },
     select: { id: true },
   });
   return existing !== null;
 }
 
-export async function filterNewJobs(
-  jobs: Array<{ sourceId: string; source: string }>,
-): Promise<{ newJobs: typeof jobs; duplicateCount: number }> {
-  const newJobs: typeof jobs = [];
+export async function filterNewJobs<T extends { sourceId: string; source: string }>(
+  jobs: T[],
+): Promise<{ newJobs: T[]; duplicateCount: number }> {
+  const newJobs: T[] = [];
   let duplicateCount = 0;
 
   for (const job of jobs) {

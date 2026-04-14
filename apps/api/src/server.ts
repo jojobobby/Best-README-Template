@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -12,7 +12,7 @@ import { requestLogger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { setupBullBoard } from './services/bullboard';
 
-export function createServer(env: ApiEnv) {
+export function createServer(env: ApiEnv): Express {
   const app = express();
 
   // Security

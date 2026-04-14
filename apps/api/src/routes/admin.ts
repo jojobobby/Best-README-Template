@@ -43,7 +43,7 @@ export function adminRouter(env: ApiEnv): Router {
   // DELETE /admin/queues/clear/:queueName
   router.delete('/queues/clear/:queueName', async (req, res, next) => {
     try {
-      const { queueName } = req.params;
+      const queueName = req.params.queueName as string;
       const confirm = req.body?.CONFIRM;
 
       if (confirm !== true) {
@@ -53,13 +53,13 @@ export function adminRouter(env: ApiEnv): Router {
         return;
       }
 
-      const validQueues = [QUEUE_NOTIFY, QUEUE_APPLY, QUEUE_SCRAPE];
-      if (!validQueues.includes(queueName!)) {
+      const validQueues: string[] = [QUEUE_NOTIFY, QUEUE_APPLY, QUEUE_SCRAPE];
+      if (!validQueues.includes(queueName)) {
         res.status(404).json({ error: `Unknown queue: ${queueName}` });
         return;
       }
 
-      const queue = createQueue(queueName!, env.REDIS_URL);
+      const queue = createQueue(queueName, env.REDIS_URL);
       await queue.empty();
 
       logger.warn('Queue cleared', { queueName });

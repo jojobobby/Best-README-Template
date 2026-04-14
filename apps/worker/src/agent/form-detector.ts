@@ -58,7 +58,7 @@ export async function detectFormFields(
       const forms = clone.querySelectorAll('form, [role="form"], .application-form, #application');
       if (forms.length > 0) {
         return Array.from(forms)
-          .map((f) => f.outerHTML)
+          .map((f: Element) => f.outerHTML)
           .join('\n')
           .slice(0, 15000);
       }

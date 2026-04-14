@@ -1,7 +1,6 @@
 import { Page } from 'playwright';
 import Anthropic from '@anthropic-ai/sdk';
 import { Identity, LogStepFn, ApplyResult, LoginRequiredError } from '@applybot/shared';
-import { generateCoverLetter } from '../agent/cover-letter';
 import { submitApplication } from '../agent/submitter';
 import { createWorkerLogger } from '../logger';
 
