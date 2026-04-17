@@ -180,7 +180,7 @@ export async function answerCustomQuestions(
   for (const field of customFields) {
     try {
       const response = await client.messages.create({
-        model: 'claude-sonnet-4-6-20250514',
+        model: 'claude-opus-4-7',
         max_tokens: 500,
         system:
           'You are filling out a job application. Answer the question concisely, professionally, and truthfully based on the applicant profile provided. Keep answers under 200 words. Do not use generic filler.',

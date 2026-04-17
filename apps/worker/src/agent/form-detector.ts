@@ -72,7 +72,7 @@ export async function detectFormFields(
     const client = new Anthropic({ apiKey: anthropicApiKey });
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-6-20250514',
+      model: 'claude-opus-4-7',
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [

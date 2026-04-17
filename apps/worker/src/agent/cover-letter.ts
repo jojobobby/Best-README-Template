@@ -20,7 +20,7 @@ export async function generateCoverLetter(
     : '';
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-6-20250514',
+    model: 'claude-opus-4-7',
     max_tokens: 2048,
     system:
       'You are a professional cover letter writer. Write a compelling, personalized cover letter. Be specific to the job. Sound human, not robotic. 3-4 paragraphs. No generic filler phrases like "I am writing to express my interest". First paragraph: hook that shows you know the company. Second: your most relevant experience matched to job requirements. Third: specific achievement with a number if possible. Fourth: enthusiastic close with call to action. Use the applicant\'s actual details.',
